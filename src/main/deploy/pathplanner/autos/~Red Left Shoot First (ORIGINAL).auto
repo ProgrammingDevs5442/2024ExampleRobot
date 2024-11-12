@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 15.57,
-      "y": 6.64
+      "x": 15.41392313553858,
+      "y": 6.7095211113499165
     },
-    "rotation": -47.24708658798974
+    "rotation": -29.14807184571312
   },
   "command": {
     "type": "sequential",
@@ -20,7 +20,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Left Hide"
+            "pathName": "Red Left Straight Intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
           }
         }
       ]

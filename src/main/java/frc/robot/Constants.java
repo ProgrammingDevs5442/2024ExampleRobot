@@ -16,11 +16,13 @@ public class Constants {
 
     public static final class driveConstants {
 
-        public final static double MaxSpeed = 15; //Max targeted speed in M/S 
+        public final static double MaxSpeed = 5; //Max targeted speed in M/S (15 NORMALLY)
         public final static double MaxAngularRate = 1.5 * Math.PI * 3; //Max targeted rotations / second -- 3/4ths of a rotation for now
         public final static double MaxAcceleration = 2; //Max acceleration in M/s/s;
         public final static double MaxAngularAcceleration = 4 * Math.PI;
         public final static double SpeedDeadbandPercentage = 0; //Deadband or Deadzone of requested speed, as a percentage of the maximum speed;
+
+        public final static double Linearity = 3; // How steep the response curve is (typically cubic, meaning 50% on stick = 12.5% speed)
 
         public final static double ControllerDeadzone = 0.15;
 
@@ -111,8 +113,9 @@ public class Constants {
 
     }
 
-    public static final class autonomousConstants {
-
+    public static final class visionConstants {
+        public final static double AngleDistrust = 10; // How much the angle should impact vision trust
+        
     }
 
 }
