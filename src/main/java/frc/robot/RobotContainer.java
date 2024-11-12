@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -12,27 +11,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.generated.TunerConstants;
@@ -42,142 +28,156 @@ import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.PathPlanner;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.Constants.driveConstants;
-import frc.robot.Constants.pivotConstants;
-import frc.robot.Constants.shooterConstants;
 
 public class RobotContainer {
 
-  public static PIDController speakerPID = shooterConstants.speakerPID; // PID loop for speaker auto rotate
-
-  public static Pigeon2 pigeon2;
-  public static TalonFX dFR, dFL, dBL, dBR;
-  public static CANcoder cFR, cFL, cBL, cBR;
+  /*---------------------------------------- VARIABLES ----------------------------------------*/
 
 
-  // /* Setting up bindings for necessary control of the swerve drive platform */
+  ///// Xbox Controllers \\\\\
 
-  public final static CommandXboxController joystick = new CommandXboxController(0); // My joystick
-  public final static CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
-
-  public final static SwerveRequest.FieldCentric driveField = new SwerveRequest.FieldCentric() //Field oriented drive
-    .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage)
-    .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Adds a deadzone to the robot's speed
-    .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-
-  public final static SwerveRequest.RobotCentric driveRobot = new SwerveRequest.RobotCentric() //Field oriented drive
-    .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage)
-    .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Adds a deadzone to the robot's speed
-    .withDriveRequestType(DriveRequestType.Velocity);
-
-
-
-  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-  public final static Telemetry logger = new Telemetry(driveConstants.MaxSpeed);
+  // Main Driver
+  public final static CommandXboxController joystick = new CommandXboxController(0); // Main Drive Controller (Commands)
+  public static XboxController xbox1 = new XboxController(0); // Main Drive Controller (Buttons)
   
-  public static Vision vision = new Vision();
-  public static Odometry odometry;
-  public static PathPlanner pathplanner = new PathPlanner();
-
-  public static boolean hasFieldOriented = false; // For auto-orienting at the start of TeleOp
-
-  ///// OPERATOR CONTROLLER \\\\\
-  public static XboxController xbox2 = new XboxController(1); // Operator joystick
-  public static XboxController xbox1 = new XboxController(0);
+  // Operator
+  public static XboxController xbox2 = new XboxController(1); // Operator Controller
   public static JoystickButton xbox2A = new JoystickButton(xbox2, 1);
   public static JoystickButton xbox2B = new JoystickButton(xbox2, 2);
   public static JoystickButton xbox2Y = new JoystickButton(xbox2, 4);
 
 
-  public static Command ShootCargo, Shoot, Intake, Pancake, kShootOverride;
+
+  ///// Drivetrain Hardware \\\\\
+
+  public static Pigeon2 pigeon2; // Gyroscope
+  public static TalonFX dFR, dFL, dBL, dBR; // Drive Motors
+  public static CANcoder cFR, cFL, cBL, cBR; // Drive Encoders
+
+
+  
+  ///// Drivetrain Setup \\\\\
+  
+  // Drivetrain
+  public final static CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
+
+  // Field Oriented Drive
+  public final static SwerveRequest.FieldCentric driveField = new SwerveRequest.FieldCentric()
+    .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
+    .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
+    .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+  // Robot Oriented Drive
+  public final static SwerveRequest.RobotCentric driveRobot = new SwerveRequest.RobotCentric()
+    .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
+    .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
+    .withDriveRequestType(DriveRequestType.Velocity);
+
+  // Emergency Brake Mode
+  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+
+
+
+  ///// Position Tracking \\\\\
+
+  // Telemetry - combines vision and odometry
+  public final static Telemetry logger = new Telemetry(driveConstants.MaxSpeed);
+  
+  public static Vision vision = new Vision(); // Limelight position
+  public static Odometry odometry; // Position based on wheel rotation
+
+  // Autonomous Paths
+  public static PathPlanner pathplanner = new PathPlanner();
+
+  // Automatic Field Orienting
+  public static boolean hasFieldOriented = false;
+
+
 
 
 
   private void configureBindings() {
 
-    
+    /*-------------------------- CTRE DRIVE CODE START --------------------------*/
 
-    // /*-------------- CTRE CODE START ----------------*/
 
-      drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-          drivetrain.applyRequest(() -> 
-              driveField
-              .withVelocityX(Sine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
-              .withVelocityY(Cosine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
-              .withRotationalRate(-Math.pow(Deadzone(joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
-      ));
-
-      joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-
-      joystick.leftBumper().whileTrue( // ROBOT ORIENT WHILE HOLDING LEFT BUMPER
+    // Default drivetrain to Field Oriented
+    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
+      drivetrain.applyRequest(() -> 
+        driveField
+        .withVelocityX(Sine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(Cosine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
+        .withRotationalRate(-Math.pow(Deadzone(joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
+    ));
+            
+    // Set drivetrain to Robot Oriented when holding left bumper
+    joystick.leftBumper().whileTrue(
       drivetrain.applyRequest(() ->
-          driveRobot
-              // .withVelocityX(Math.pow(Deadzone(joystick.getLeftY()), 3) * driveConstants.MaxSpeed) //* (1 - (joystick.getLeftTriggerAxis() * 0.8))) // Drive forward with negative Y (forward)
-              // .withVelocityY(Math.pow(Deadzone(joystick.getLeftX()), 3) * driveConstants.MaxSpeed) //* (1 - (joystick.getLeftTriggerAxis() * 0.8))) // Drive left with negative X (left)
-              .withVelocityX(Sine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
-              .withVelocityY(Cosine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
-              .withRotationalRate(-Math.pow(Deadzone(joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
-      ));
+        driveRobot
+        .withVelocityX(Sine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(Cosine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
+        .withRotationalRate(-Math.pow(Deadzone(joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
+    ));
+    
+    // Emergency Brake (wheels in X pattern)
+    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        
 
-      joystick.leftBumper().onTrue(new Command() { // Reset driver rumble when left bumper is pressed
-        @Override
-        public void initialize() {
-          xbox1.setRumble(RumbleType.kBothRumble, 0);
-        }
+    /*--------------------------- CTRE DRIVE CODE END ---------------------------*/
 
-        @Override
-        public boolean isFinished() {
-          return true;
-        }
-      });
 
-      // reset the field-centric heading on down dpad press
-      joystick.povDown().onTrue(new Command() {
-        @Override
-        public void initialize() {
-          drivetrain.seedFieldRelative();
-          hasFieldOriented = true;
-          xbox1.setRumble(RumbleType.kBothRumble, 0);
-        }
-        @Override 
-        public boolean isFinished() {
-          return true;
-        }
-      });
 
-      if (Utils.isSimulation()) {
-        drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+    // Reset the Field Orientation on down dpad press
+    joystick.povDown().onTrue(new Command() {
+      @Override
+      public void initialize() {
+        drivetrain.seedFieldRelative();
+        hasFieldOriented = true;
+        xbox1.setRumble(RumbleType.kBothRumble, 0);
       }
+      @Override 
+      public boolean isFinished() {
+        return true;
+      }
+    });
 
-      drivetrain.registerTelemetry(logger::telemeterize);
-
+    // Reset driver controller rumble on left bumper press
+    joystick.leftBumper().onTrue(new Command() {
+      @Override
+      public void initialize() {
+        xbox1.setRumble(RumbleType.kBothRumble, 0);
+      }
       
+      @Override
+      public boolean isFinished() {
+        return true;
+      }
+    });
 
+    if (Utils.isSimulation()) {
+      drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+    }
 
-    // /*-------------- CTRE CODE END ----------------*/
+    drivetrain.registerTelemetry(logger::telemeterize);
     
 
 
-    
   }
     
-    
-    //What we want
-    // A Button - Fire command - shoot the funnyun if ready
-    // Right Trigger - Rev button, aim the shooter if in speaker mode
-    // (Speaker Mode / Amp Mode), two buttons to set it to either fire into the amp or the speaker.
-
+  // Controller Deadzone
   public static double Deadzone(double speed) {
     if (Math.abs(speed) > driveConstants.ControllerDeadzone) return speed;
     return 0;
   }
 
+  // Controller Y value curving
   public static double Cosine(double x, double y) {
     x = Deadzone(x);
     y = Deadzone(y);
     return Math.pow(Math.sqrt((x*x)+(y*y)), driveConstants.Linearity) * Math.cos(Math.atan2(y,x));
   }
 
+  // Controller X value curving
   public static double Sine(double x, double y) {
     x = Deadzone(x);
     y = Deadzone(y);
