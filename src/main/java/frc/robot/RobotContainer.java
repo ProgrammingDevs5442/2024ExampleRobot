@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Telemetry;
@@ -42,9 +41,6 @@ public class RobotContainer {
   
   // Operator
   public static XboxController xbox2 = new XboxController(1); // Operator Controller
-  public static JoystickButton xbox2A = new JoystickButton(xbox2, 1);
-  public static JoystickButton xbox2B = new JoystickButton(xbox2, 2);
-  public static JoystickButton xbox2Y = new JoystickButton(xbox2, 4);
 
 
 
@@ -159,8 +155,6 @@ public class RobotContainer {
     }
 
     drivetrain.registerTelemetry(logger::telemeterize);
-    
-
 
   }
     
@@ -195,23 +189,26 @@ public class RobotContainer {
 
   public RobotContainer() {
 
+    ///// Drivetrain Hardware \\\\\
+    // Note - device IDs for actual drive code are set in TunerConstants.java
+    // (the motors and encoders here are mostly for SmartDashboard)
+
+    // Drive Motors
     dFR = new TalonFX(1);
     dFL = new TalonFX(3);
     dBL = new TalonFX(5);
     dBR = new TalonFX(7);
 
+    // Drive Encoders (Rotation Angle)
     cFR = new CANcoder(12);
     cFL = new CANcoder(9);
     cBL = new CANcoder(10);
     cBR = new CANcoder(11);
-
-    ///// INPUTS \\\\\
-    xbox2A = new JoystickButton(xbox2, 1);
-    xbox2B = new JoystickButton(xbox2, 2);
-    xbox2Y = new JoystickButton(xbox2, 4);
     
-    ///// AUTO \\\\\
-    pigeon2 = new Pigeon2(0);    
+
+
+    ///// AUTO \\\\\ TODO - Understand and document auto...
+    pigeon2 = new Pigeon2(0);
 
     AutoBuilder.configureHolonomic(
       odometry::getPose,

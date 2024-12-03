@@ -51,17 +51,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
-    // @Override 
-    // public void periodic() {
-    //     Optional<Alliance> ally = DriverStation.getAlliance();
-    //       if(!hasAppliedPerspective) {
-    //       if(ally.get() == Alliance.Blue) {
-    //         this.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
-    //         hasAppliedPerspective = true;
-    //       } else if(ally.get() == Alliance.Red) {
-    //         this.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
-    //         hasAppliedPerspective = true;
-    //       }
-    //     }
-    // }
+    @Override 
+    public void periodic() {
+        
+    }
 }
