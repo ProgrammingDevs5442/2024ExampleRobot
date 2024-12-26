@@ -22,36 +22,43 @@ import frc.robot.Constants.driveConstants;
 
 public class Odometry extends SubsystemBase {
 
-  private static Translation2d FR = new Translation2d(driveConstants.ChassisModulePosX, driveConstants.ChassisModulePosY);
-  private static Translation2d FL = new Translation2d(-driveConstants.ChassisModulePosX, driveConstants.ChassisModulePosY);
-  private static Translation2d BL = new Translation2d(-driveConstants.ChassisModulePosX, -driveConstants.ChassisModulePosY);
-  private static Translation2d BR = new Translation2d(driveConstants.ChassisModulePosX, -driveConstants.ChassisModulePosY);
+  // Position of wheels in 2D space
+  private static Translation2d FR = new Translation2d(driveConstants.ChassisModulePosX, driveConstants.ChassisModulePosY); // +x +y
+  private static Translation2d FL = new Translation2d(-driveConstants.ChassisModulePosX, driveConstants.ChassisModulePosY); // -x +y
+  private static Translation2d BL = new Translation2d(-driveConstants.ChassisModulePosX, -driveConstants.ChassisModulePosY); // -x -y
+  private static Translation2d BR = new Translation2d(driveConstants.ChassisModulePosX, -driveConstants.ChassisModulePosY); // +x -y
 
+  // Inital position of swerve modules
   private static SwerveModulePosition FRpos;
   private static SwerveModulePosition FLpos;
   private static SwerveModulePosition BLpos;
   private static SwerveModulePosition BRpos;
   private static SwerveModulePosition[] swerveModulePositions;
 
+  // Swerve drive object
   private static SwerveDriveKinematics kinematics;
 
+   // Encoder and gyro mesurements to estimate position
   public static SwerveDrivePoseEstimator poseEstimator;
-  private static Pose2d pose = new Pose2d();
 
-  private final Field2d m_field = new Field2d();
+  // 2D coordinates of the playing field and robot
+  private static Pose2d pose = new Pose2d(); // Represents robot position
+  private final Field2d m_field = new Field2d(); // Represents field and robot position on it
 
 
   /** Creates a new Odometry. */
   public Odometry() {
 
-    SmartDashboard.putData("Field", m_field);
+    SmartDashboard.putData("Field", m_field); // TODO comment here
 
 
+    // Finding initial positon of the motors
     FRpos = RobotContainer.drivetrain.getModule(1).getPosition(true);
     FLpos = RobotContainer.drivetrain.getModule(0).getPosition(true);
     BLpos = RobotContainer.drivetrain.getModule(2).getPosition(true);
     BRpos = RobotContainer.drivetrain.getModule(3).getPosition(true);
 
+    // Initial object setup
     swerveModulePositions = new SwerveModulePosition[] {FRpos, FLpos, BLpos, BRpos};
 
     kinematics = new SwerveDriveKinematics(FR,FL,BL,BR);
@@ -71,27 +78,29 @@ public class Odometry extends SubsystemBase {
     return pose;
   }
 
+  // Reset position
   public void resetPose(Pose2d pose) {
     System.out.println("Reset Pose");
     poseEstimator.resetPosition(RobotContainer.drivetrain.getRotation3d().toRotation2d(), swerveModulePositions, pose);
     RobotContainer.drivetrain.seedFieldRelative(pose);
   }
 
+  // Gets speed of the chassis to know how far the robot has moved
   public ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(
-      RobotContainer.drivetrain.getModule(1).getCurrentState(),
-      RobotContainer.drivetrain.getModule(2).getCurrentState(),
-      RobotContainer.drivetrain.getModule(0).getCurrentState(),
-      RobotContainer.drivetrain.getModule(3).getCurrentState()
+      RobotContainer.drivetrain.getModule(1).getCurrentState(), // FR
+      RobotContainer.drivetrain.getModule(0).getCurrentState(), // FL
+      RobotContainer.drivetrain.getModule(2).getCurrentState(), // BL
+      RobotContainer.drivetrain.getModule(3).getCurrentState()  // BR
     );
   }
  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    //Updates the Odometry
 
-    FRpos = RobotContainer.drivetrain.getModule(1).getPosition(true);
+    // Constantly update wheel positions
+    FRpos = RobotContainer.drivetrain.getModule(1).getPosition(true); 
     FLpos = RobotContainer.drivetrain.getModule(0).getPosition(true);
     BLpos = RobotContainer.drivetrain.getModule(2).getPosition(true);
     BRpos = RobotContainer.drivetrain.getModule(3).getPosition(true);
@@ -100,19 +109,18 @@ public class Odometry extends SubsystemBase {
 
     pose = poseEstimator.update(RobotContainer.drivetrain.getRotation3d().toRotation2d(), swerveModulePositions);  
 
-    // if (RobotContainer.vision.target()) { // OLD, seems to only pick up the speaker tag
     if (RobotContainer.vision.targetID > 0) { // Should run if any tags are in view
       poseEstimator.addVisionMeasurement(RobotContainer.vision.getFieldPose(), Timer.getFPGATimestamp());
     }
 
+    // Displaying values on SmartDashboard
     SmartDashboard.putNumber("Robot Position X", poseEstimator.getEstimatedPosition().getX());
     SmartDashboard.putNumber("Robot Position Y", poseEstimator.getEstimatedPosition().getY());
     SmartDashboard.putNumber("Robot Position Angle", poseEstimator.getEstimatedPosition().getRotation().getDegrees());
 
 
-    m_field.setRobotPose(poseEstimator.getEstimatedPosition());
-    // SmartDashboard.putNumber("Robot Position X Difference", RobotContainer.vision.getFieldPose().getX() - poseEstimator.getEstimatedPosition().getX());
-    // SmartDashboard.putNumber("Robot Position Y Difference", RobotContainer.vision.getFieldPose().getY() - poseEstimator.getEstimatedPosition().getY());
+    // Update robot positon on field
+    m_field.setRobotPose(poseEstimator.getEstimatedPosition()); // TODO Check if we can move this above SmartDashboard
   }
   
 }
