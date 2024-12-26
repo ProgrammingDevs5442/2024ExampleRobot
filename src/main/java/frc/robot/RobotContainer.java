@@ -21,12 +21,14 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Telemetry;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.PathPlanner;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.Constants.driveConstants;
+import frc.robot.commands.ExampleCommand;
 
 public class RobotContainer {
 
@@ -41,6 +43,16 @@ public class RobotContainer {
   
   // Operator
   public static XboxController xbox2 = new XboxController(1); // Operator Controller
+
+
+
+  ///// Example \\\\\
+  
+  // Example Hardware
+  public static TalonFX exampleMotor;
+
+  // Example Subsystem
+  public static ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 
 
 
@@ -96,7 +108,6 @@ public class RobotContainer {
 
     /*-------------------------- CTRE DRIVE CODE START --------------------------*/
 
-
     // Default drivetrain to Field Oriented
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
       drivetrain.applyRequest(() -> 
@@ -116,11 +127,9 @@ public class RobotContainer {
     ));
     
     // Emergency Brake (wheels in X pattern)
-    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        
+    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));        
 
     /*--------------------------- CTRE DRIVE CODE END ---------------------------*/
-
 
 
     // Reset the Field Orientation on down dpad press
@@ -156,27 +165,31 @@ public class RobotContainer {
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
-  }
-    
-  // Controller Deadzone
+  }  
+
+
+
+  ///// Controller Deadzone \\\\\
   public static double Deadzone(double speed) {
     if (Math.abs(speed) > driveConstants.ControllerDeadzone) return speed;
     return 0;
   }
 
-  // Controller Y value curving
+  ///// Controller Y value curving \\\\\
   public static double Cosine(double x, double y) {
     x = Deadzone(x);
     y = Deadzone(y);
     return Math.pow(Math.sqrt((x*x)+(y*y)), driveConstants.Linearity) * Math.cos(Math.atan2(y,x));
   }
 
-  // Controller X value curving
+  ///// Controller X value curving \\\\\
   public static double Sine(double x, double y) {
     x = Deadzone(x);
     y = Deadzone(y);
     return Math.pow(Math.sqrt((x*x)+(y*y)), driveConstants.Linearity) * Math.sin(Math.atan2(y,x));
   }
+
+
 
   public static void driveChassisSpeeds(ChassisSpeeds speeds) {
     drivetrain.setControl(
@@ -187,7 +200,13 @@ public class RobotContainer {
     );
   }
 
+
+
   public RobotContainer() {
+
+    ///// Example Hardware \\\\\
+    exampleMotor = new TalonFX(32); // Update the ID to match an actual motor
+
 
     ///// Drivetrain Hardware \\\\\
     // Note - device IDs for actual drive code are set in TunerConstants.java
@@ -204,7 +223,6 @@ public class RobotContainer {
     cFL = new CANcoder(9);
     cBL = new CANcoder(10);
     cBR = new CANcoder(11);
-    
 
 
     ///// AUTO \\\\\ TODO - Understand and document auto...
@@ -225,6 +243,8 @@ public class RobotContainer {
 
     configureBindings();
   }
+
+
 
   public Command getAutonomousCommand() { 
     return pathplanner.getAuto();
