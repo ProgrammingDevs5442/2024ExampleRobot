@@ -34,9 +34,7 @@ public class RobotContainer {
 
   /*---------------------------------------- VARIABLES ----------------------------------------*/
 
-
   ///// Xbox Controllers \\\\\
-
   // Main Driver
   public final static CommandXboxController joystick = new CommandXboxController(0); // Main Drive Controller (Commands)
   public static XboxController xbox1 = new XboxController(0); // Main Drive Controller (Buttons)
@@ -45,9 +43,7 @@ public class RobotContainer {
   public static XboxController xbox2 = new XboxController(1); // Operator Controller
 
 
-
-  ///// Example \\\\\
-  
+  ///// Example \\\\\  
   // Example Hardware
   public static TalonFX exampleMotor;
 
@@ -55,32 +51,20 @@ public class RobotContainer {
   public static ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 
 
-
-  ///// Drivetrain Hardware \\\\\
-
+  ///// Drivetrain \\\\\
+  // Drivetrain Hardware
   public static Pigeon2 pigeon2; // Gyroscope
   public static TalonFX dFR, dFL, dBL, dBR; // Drive Motors
   public static CANcoder cFR, cFL, cBL, cBR; // Drive Encoders
-
-
   
-  ///// Drivetrain Setup \\\\\
-  
-  // Drivetrain
+  // Drivetrain Setup  
   public final static CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
 
-  // Field Oriented Drive
-  public final static SwerveRequest.FieldCentric driveField = CommandSwerveDrivetrain.driveField;
+  public final static SwerveRequest.FieldCentric driveField = CommandSwerveDrivetrain.driveField; // Field Oriented
+  public final static SwerveRequest.RobotCentric driveRobot = CommandSwerveDrivetrain.driveRobot; // Robot Oriented
+  public final static SwerveRequest.RobotCentric driveAuto = CommandSwerveDrivetrain.driveAuto;   // Robot Oriented (Auto)
 
-  // Robot Oriented Drive
-  public final static SwerveRequest.RobotCentric driveRobot = CommandSwerveDrivetrain.driveRobot;
-
-  // Autonomous Robot Oriented Drive
-  public final static SwerveRequest.RobotCentric driveAuto = CommandSwerveDrivetrain.driveAuto;
-
-  // Emergency Brake Mode
-  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-
+  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake(); // Emergency brake (x-shape)
 
 
   ///// Position Tracking \\\\\
@@ -93,17 +77,11 @@ public class RobotContainer {
 
   // Autonomous Paths
   public static PathPlanner pathplanner = new PathPlanner();
-
-  // Automatic Field Orienting
-  public static boolean hasFieldOriented = false;
-
-
+  public static boolean hasFieldOriented = false; // Used to automatically set orientation at start of match
 
 
 
   private void configureBindings() {
-
-    /*-------------------------- CTRE DRIVE CODE START --------------------------*/
 
     // Default drivetrain to Field Oriented (executed periodically)
     drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> driveField));
@@ -113,8 +91,6 @@ public class RobotContainer {
     
     // Emergency Brake (wheels in X pattern)
     joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));        
-
-    /*--------------------------- CTRE DRIVE CODE END ---------------------------*/
 
 
     // Reset the Field Orientation on down dpad press
