@@ -129,6 +129,12 @@ public class RobotContainer {
   }  
 
 
+  ///// Controller Deadzone \\\\\
+  public static double Deadzone(double speed) {
+    if (Math.abs(speed) > driveConstants.ControllerDeadzone) return speed;
+    return 0;
+  }
+
 
   public static void driveChassisSpeeds(ChassisSpeeds speeds) {
     drivetrain.setControl(

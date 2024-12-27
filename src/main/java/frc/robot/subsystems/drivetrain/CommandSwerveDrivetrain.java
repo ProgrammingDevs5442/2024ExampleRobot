@@ -3,6 +3,7 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj.Notifier;
@@ -59,26 +60,26 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public final static SwerveRequest.FieldCentric driveField = new SwerveRequest.FieldCentric()
         .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
         .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
-        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
         .withVelocityX(Sine(RobotContainer.joystick.getLeftX(), RobotContainer.joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
         .withVelocityY(Cosine(RobotContainer.joystick.getLeftX(), RobotContainer.joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
-        .withRotationalRate(-Math.pow(Deadzone(RobotContainer.joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
+        .withRotationalRate(-Math.pow(Deadzone(RobotContainer.joystick.getRightX()), 3) * driveConstants.MaxAngularRate); // Drive counterclockwise with negative X (left)
 
     // Robot Oriented Drive
     public final static SwerveRequest.RobotCentric driveRobot = new SwerveRequest.RobotCentric()
         .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
         .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
-        .withDriveRequestType(DriveRequestType.Velocity);
+        .withDriveRequestType(DriveRequestType.Velocity)
         .withVelocityX(Sine(RobotContainer.joystick.getLeftX(), RobotContainer.joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
         .withVelocityY(Cosine(RobotContainer.joystick.getLeftX(), RobotContainer.joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
-        .withRotationalRate(-Math.pow(Deadzone(RobotContainer.joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
+        .withRotationalRate(-Math.pow(Deadzone(RobotContainer.joystick.getRightX()), 3) * driveConstants.MaxAngularRate); // Drive counterclockwise with negative X (left)
 
     // Autonomous Robot Oriented Drive
     public final static SwerveRequest.RobotCentric driveAuto = new SwerveRequest.RobotCentric()
-    .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
-    .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
-    .withDriveRequestType(DriveRequestType.Velocity);
-    // Velocity and rotation set in RobotContainer
+        .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
+        .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
+        .withDriveRequestType(DriveRequestType.Velocity);
+        // Velocity and rotation set in RobotContainer
 
 
 
