@@ -6,6 +6,8 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -101,6 +103,36 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         x = Deadzone(x);
         y = Deadzone(y);
         return Math.pow(Math.sqrt((x*x)+(y*y)), driveConstants.Linearity) * Math.sin(Math.atan2(y,x));
+    }
+
+    /** Set field orientation to current angle. */
+    public Command resetField() {
+        return new Command() {
+            @Override
+            public void initialize() {
+                RobotContainer.drivetrain.seedFieldRelative();
+                RobotContainer.hasFieldOriented = true;
+                RobotContainer.xbox1.setRumble(RumbleType.kBothRumble, 0);
+            }
+            @Override 
+            public boolean isFinished() {
+                return true;
+            }
+        };
+    }
+
+    /** End controller rumble if it doesn't stop. */
+    public Command endRumble() {
+        return new Command() {
+            @Override
+            public void initialize() {
+                RobotContainer.xbox1.setRumble(RumbleType.kBothRumble, 0);
+            }
+            @Override
+            public boolean isFinished() {
+                return true;
+            }
+        };
     }
 
     @Override 

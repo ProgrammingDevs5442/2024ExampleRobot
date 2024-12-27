@@ -9,7 +9,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,7 +16,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.generated.TunerConstants;
@@ -89,36 +87,11 @@ public class RobotContainer {
     // Set drivetrain to Robot Oriented while holding left bumper
     joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> driveRobot));
     
-    // Emergency Brake (wheels in X pattern)
-    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));        
 
+    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake)); // Emergency Brake (wheels in X pattern) when A button pressed
+    joystick.povDown().onTrue(drivetrain.resetField()); // Reset Field orientation on down dpad press
+    joystick.leftBumper().onTrue(drivetrain.endRumble()); // End controller rumble on left bumper press
 
-    // Reset the Field Orientation on down dpad press
-    joystick.povDown().onTrue(new Command() {
-      @Override
-      public void initialize() {
-        drivetrain.seedFieldRelative();
-        hasFieldOriented = true;
-        xbox1.setRumble(RumbleType.kBothRumble, 0);
-      }
-      @Override 
-      public boolean isFinished() {
-        return true;
-      }
-    });
-
-    // Reset driver controller rumble on left bumper press
-    joystick.leftBumper().onTrue(new Command() {
-      @Override
-      public void initialize() {
-        xbox1.setRumble(RumbleType.kBothRumble, 0);
-      }
-      
-      @Override
-      public boolean isFinished() {
-        return true;
-      }
-    });
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -136,6 +109,7 @@ public class RobotContainer {
   }
 
 
+  // Drive with given speeds during Autonomous
   public static void driveChassisSpeeds(ChassisSpeeds speeds) {
     drivetrain.setControl(
       driveAuto
@@ -150,7 +124,8 @@ public class RobotContainer {
   public RobotContainer() {
 
     ///// Example Hardware \\\\\
-    exampleMotor = new TalonFX(32); // Update the ID to match an actual motor
+    exampleMotor = new TalonFX(32); // Make sure to update the ID to match an actual motor
+    exampleSubsystem.setDefaultCommand(new ExampleCommand()); // Connect the Command and Subsystem
 
 
     ///// Drivetrain Hardware \\\\\

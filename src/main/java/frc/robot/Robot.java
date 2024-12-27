@@ -8,6 +8,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.AutoFieldOrient;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -18,6 +19,9 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_robotContainer = new RobotContainer();
     CameraServer.startAutomaticCapture(0); // Used to connect a USB camera to SmartDashboard
+    
+    new AutoFieldOrient(); // Set field orientation based on the first limelight in view
+    // TODO check when this command ends
   }
 
   @Override
