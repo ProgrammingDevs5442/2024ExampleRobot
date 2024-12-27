@@ -11,7 +11,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.Constants.visionConstants;
 
-/** Add your docs here. */
+/** Converts most of the important NetworkTables values to more friendly formats. */
 public class CalculatedLimelight {
 
   ///// Values \\\\\
@@ -53,22 +53,22 @@ public class CalculatedLimelight {
 
     return new Pose2d(
       new Translation2d(
-        fieldTable[0], // X position
-        fieldTable[1]  // Y position
+        fieldTable[0], // X position (right/left from camera perspective)
+        fieldTable[2]  // Z position (forward/back from camera perspective)
       ),
-      Rotation2d.fromDegrees(fieldTable[5]) // Rotation
+      Rotation2d.fromDegrees(fieldTable[5]) // Rotation (pitch)
     );
   }
 
-  public Pose2d getLocalPose() {
+  public Pose2d getTargetPose() {
     double[] fieldTable = getNetworkTable().getEntry("botpose_targetspace").getDoubleArray(new double[7]);
 
     return new Pose2d(
       new Translation2d(
-        fieldTable[0], // X position
-        fieldTable[1]  // Y position
+        fieldTable[0], // X position (right/left from camera perspective)
+        fieldTable[2]  // Z position (forward/back from camera perspective)
       ),
-      Rotation2d.fromDegrees(fieldTable[5]) // Rotation
+      Rotation2d.fromDegrees(fieldTable[5]) // Rotation (pitch)
     );
   }
 }
