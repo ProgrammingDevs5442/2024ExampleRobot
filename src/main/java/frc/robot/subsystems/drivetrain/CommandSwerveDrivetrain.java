@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.RobotContainer;
+import frc.robot.Constants.driveConstants;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
@@ -49,6 +51,55 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+
+
+    // Field Oriented Drive
+    public final static SwerveRequest.FieldCentric driveField = new SwerveRequest.FieldCentric()
+        .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
+        .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        .withVelocityX(Sine(RobotContainer.joystick.getLeftX(), RobotContainer.joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(Cosine(RobotContainer.joystick.getLeftX(), RobotContainer.joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
+        .withRotationalRate(-Math.pow(Deadzone(RobotContainer.joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
+
+    // Robot Oriented Drive
+    public final static SwerveRequest.RobotCentric driveRobot = new SwerveRequest.RobotCentric()
+        .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
+        .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
+        .withDriveRequestType(DriveRequestType.Velocity);
+        .withVelocityX(Sine(RobotContainer.joystick.getLeftX(), RobotContainer.joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(Cosine(RobotContainer.joystick.getLeftX(), RobotContainer.joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
+        .withRotationalRate(-Math.pow(Deadzone(RobotContainer.joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
+
+    // Autonomous Robot Oriented Drive
+    public final static SwerveRequest.RobotCentric driveAuto = new SwerveRequest.RobotCentric()
+    .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
+    .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
+    .withDriveRequestType(DriveRequestType.Velocity);
+    // Velocity and rotation set in RobotContainer
+
+
+
+    ///// Controller Deadzone \\\\\
+    public static double Deadzone(double speed) {
+        if (Math.abs(speed) > driveConstants.ControllerDeadzone) return speed;
+        return 0;
+    }
+
+    ///// Controller Y value curving \\\\\
+    public static double Cosine(double x, double y) {
+        x = Deadzone(x);
+        y = Deadzone(y);
+        return Math.pow(Math.sqrt((x*x)+(y*y)), driveConstants.Linearity) * Math.cos(Math.atan2(y,x));
+    }
+
+    ///// Controller X value curving \\\\\
+    public static double Sine(double x, double y) {
+        x = Deadzone(x);
+        y = Deadzone(y);
+        return Math.pow(Math.sqrt((x*x)+(y*y)), driveConstants.Linearity) * Math.sin(Math.atan2(y,x));
     }
 
     @Override 

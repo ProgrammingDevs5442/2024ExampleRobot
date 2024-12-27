@@ -70,16 +70,13 @@ public class RobotContainer {
   public final static CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
 
   // Field Oriented Drive
-  public final static SwerveRequest.FieldCentric driveField = new SwerveRequest.FieldCentric()
-    .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
-    .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
-    .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+  public final static SwerveRequest.FieldCentric driveField = CommandSwerveDrivetrain.driveField;
 
   // Robot Oriented Drive
-  public final static SwerveRequest.RobotCentric driveRobot = new SwerveRequest.RobotCentric()
-    .withDeadband(driveConstants.MaxSpeed * driveConstants.SpeedDeadbandPercentage) // Speed deadzone
-    .withRotationalDeadband(driveConstants.MaxAngularRate * driveConstants.SpeedDeadbandPercentage) // Rotation speed deadzone
-    .withDriveRequestType(DriveRequestType.Velocity);
+  public final static SwerveRequest.RobotCentric driveRobot = CommandSwerveDrivetrain.driveRobot;
+
+  // Autonomous Robot Oriented Drive
+  public final static SwerveRequest.RobotCentric driveAuto = CommandSwerveDrivetrain.driveAuto;
 
   // Emergency Brake Mode
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -108,23 +105,11 @@ public class RobotContainer {
 
     /*-------------------------- CTRE DRIVE CODE START --------------------------*/
 
-    // Default drivetrain to Field Oriented
-    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-      drivetrain.applyRequest(() -> 
-        driveField
-        .withVelocityX(Sine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
-        .withVelocityY(Cosine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
-        .withRotationalRate(-Math.pow(Deadzone(joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
-    ));
+    // Default drivetrain to Field Oriented (executed periodically)
+    drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> driveField));
             
-    // Set drivetrain to Robot Oriented when holding left bumper
-    joystick.leftBumper().whileTrue(
-      drivetrain.applyRequest(() ->
-        driveRobot
-        .withVelocityX(Sine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive forward with negative Y (forward)
-        .withVelocityY(Cosine(joystick.getLeftX(), joystick.getLeftY()) * driveConstants.MaxSpeed) // Drive left with negative X (left)
-        .withRotationalRate(-Math.pow(Deadzone(joystick.getRightX()), 3) * driveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
-    ));
+    // Set drivetrain to Robot Oriented while holding left bumper
+    joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> driveRobot));
     
     // Emergency Brake (wheels in X pattern)
     joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));        
@@ -169,31 +154,9 @@ public class RobotContainer {
 
 
 
-  ///// Controller Deadzone \\\\\
-  public static double Deadzone(double speed) {
-    if (Math.abs(speed) > driveConstants.ControllerDeadzone) return speed;
-    return 0;
-  }
-
-  ///// Controller Y value curving \\\\\
-  public static double Cosine(double x, double y) {
-    x = Deadzone(x);
-    y = Deadzone(y);
-    return Math.pow(Math.sqrt((x*x)+(y*y)), driveConstants.Linearity) * Math.cos(Math.atan2(y,x));
-  }
-
-  ///// Controller X value curving \\\\\
-  public static double Sine(double x, double y) {
-    x = Deadzone(x);
-    y = Deadzone(y);
-    return Math.pow(Math.sqrt((x*x)+(y*y)), driveConstants.Linearity) * Math.sin(Math.atan2(y,x));
-  }
-
-
-
   public static void driveChassisSpeeds(ChassisSpeeds speeds) {
     drivetrain.setControl(
-      driveRobot
+      driveAuto
       .withVelocityX(speeds.vxMetersPerSecond)
       .withVelocityY(speeds.vyMetersPerSecond)
       .withRotationalRate(speeds.omegaRadiansPerSecond)
