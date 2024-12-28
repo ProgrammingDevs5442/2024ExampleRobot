@@ -40,10 +40,17 @@ public class Vision extends SubsystemBase {
     return false; // If none of the limelights see a target, return false.
   }
 
+  /** Returns the ID of the currently visible target for the specified limelight (or -1 if there are none). */
+  public long getTargetID(int limelightID) {
+    return limelights[limelightID].getTargetID();
+  }
+
+  /** Returns the target-relative Pose2d of the specified limelight. */
   public Pose2d getTargetPose(int limelightID) {
     return limelights[limelightID].getTargetPose();
   }
 
+  /** Returns the field-relative Pose2d calculated from all limelights. */
   public Pose2d getFieldPose() {
     double fX = 0;
     double fY = 0;
