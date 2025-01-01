@@ -79,14 +79,13 @@ public class RobotContainer {
 
 
 
+  /** Place to configure bindings for the CommandXboxController, such as driving modes. */
   private void configureBindings() {
 
-    // Default drivetrain to Field Oriented (executed periodically)
+    // DEFAULT: Field Oriented (command executed periodically)
     drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> driveField));
-            
-    // Set drivetrain to Robot Oriented while holding left bumper
-    joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> driveRobot));
     
+    joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> driveRobot)); // Robot Oriented while holding left bumper
 
     joystick.a().whileTrue(drivetrain.applyRequest(() -> brake)); // Emergency Brake (wheels in X pattern) when A button pressed
     joystick.povDown().onTrue(drivetrain.resetField()); // Reset Field orientation on down dpad press
@@ -102,14 +101,16 @@ public class RobotContainer {
   }  
 
 
-  ///// Controller Deadzone \\\\\
+
+  /** Function that returns a given speed, as long as it is above the deadzone set in Constants. */
   public static double Deadzone(double speed) {
     if (Math.abs(speed) > driveConstants.ControllerDeadzone) return speed;
     return 0;
   }
 
 
-  // Drive with given speeds during Autonomous
+
+  /** Drive with given speeds during Autonomous. */
   public static void driveChassisSpeeds(ChassisSpeeds speeds) {
     drivetrain.setControl(
       driveAuto
