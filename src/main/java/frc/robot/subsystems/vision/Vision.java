@@ -38,8 +38,8 @@ public class Vision extends SubsystemBase {
 
   /** Returns true if any limelights see a target. */
   public boolean hasTarget() {
-    for (int l = 0; l < limelights.size(); l++) {
-      if (limelights.get(l).hasTarget()) return true; // If any of the limelights see a target, return true.
+    for (CalculatedLimelight LL : limelights) {
+      if (LL.hasTarget()) return true; // If any of the limelights see a target, return true.
     }
     return false; // If none of the limelights see a target, return false.
   }
@@ -62,12 +62,12 @@ public class Vision extends SubsystemBase {
     double tot = 0;
 
     // Weighted Average of all limelights, based on trust (how accurate we think one is at a given point)
-    for (int l = 0; l < limelights.size(); l++) {
-      if (limelights.get(l).hasTarget()) {
-        fX += limelights.get(l).getFieldPose().getX() * limelights.get(l).getTrust(); // Weighted X pos
-        fY += limelights.get(l).getFieldPose().getY() * limelights.get(l).getTrust(); // Weighted Y pos
-        fR += limelights.get(l).getFieldPose().getRotation().getDegrees() * limelights.get(l).getTrust(); // Weighted rotation
-        tot += limelights.get(l).getTrust(); // Add the weights to divide later
+    for (CalculatedLimelight LL : limelights) {
+      if (LL.hasTarget()) {
+        fX += LL.getFieldPose().getX() * LL.getTrust(); // Weighted X pos
+        fY += LL.getFieldPose().getY() * LL.getTrust(); // Weighted Y pos
+        fR += LL.getFieldPose().getRotation().getDegrees() * LL.getTrust(); // Weighted rotation
+        tot += LL.getTrust(); // Add the weights to divide later
       }
     }
 
