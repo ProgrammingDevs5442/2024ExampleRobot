@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.vision;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,7 +19,9 @@ import frc.robot.subsystems.Telemetry;
 
 public class Vision extends SubsystemBase {
 
-  CalculatedLimelight[] limelights = new CalculatedLimelight[2];
+  ArrayList<CalculatedLimelight> limelights = new ArrayList<CalculatedLimelight>(); // List of Limelights for Field-Oriented calculation
+  
+  // Initialize Calculated Limelights (custom object)
   CalculatedLimelight frontLL = new CalculatedLimelight("limelight");
   CalculatedLimelight backLL = new CalculatedLimelight("limelight-main");
 
@@ -26,28 +29,29 @@ public class Vision extends SubsystemBase {
 
   /** Creates a new Vision. */
   public Vision() {
-    limelights[0] = frontLL;
-    limelights[1] = backLL;
+    // Add Calculated Limelights to list
+    limelights.add(frontLL);
+    limelights.add(backLL);
 
     logger = RobotContainer.logger;
   }
 
   /** Returns true if any limelights see a target. */
   public boolean hasTarget() {
-    for (int l = 0; l < limelights.length; l++) {
-      if (limelights[l].hasTarget()) return true; // If any of the limelights see a target, return true.
+    for (int l = 0; l < limelights.size(); l++) {
+      if (limelights.get(l).hasTarget()) return true; // If any of the limelights see a target, return true.
     }
     return false; // If none of the limelights see a target, return false.
   }
 
   /** Returns the ID of the currently visible target for the specified limelight (or -1 if there are none). */
   public long getTargetID(int limelightID) {
-    return limelights[limelightID].getTargetID();
+    return limelights.get(limelightID).getTargetID();
   }
 
   /** Returns the target-relative Pose2d of the specified limelight. */
   public Pose2d getTargetPose(int limelightID) {
-    return limelights[limelightID].getTargetPose();
+    return limelights.get(limelightID).getTargetPose();
   }
 
   /** Returns the field-relative Pose2d calculated from all limelights. */
@@ -58,12 +62,12 @@ public class Vision extends SubsystemBase {
     double tot = 0;
 
     // Weighted Average of all limelights, based on trust (how accurate we think one is at a given point)
-    for (int l = 0; l < limelights.length; l++) {
-      if (limelights[l].hasTarget()) {
-        fX += limelights[l].getFieldPose().getX() * limelights[l].getTrust(); // Weighted X pos
-        fY += limelights[l].getFieldPose().getY() * limelights[l].getTrust(); // Weighted Y pos
-        fR += limelights[l].getFieldPose().getRotation().getDegrees() * limelights[l].getTrust(); // Weighted rotation
-        tot += limelights[l].getTrust(); // Add the weights to divide later
+    for (int l = 0; l < limelights.size(); l++) {
+      if (limelights.get(l).hasTarget()) {
+        fX += limelights.get(l).getFieldPose().getX() * limelights.get(l).getTrust(); // Weighted X pos
+        fY += limelights.get(l).getFieldPose().getY() * limelights.get(l).getTrust(); // Weighted Y pos
+        fR += limelights.get(l).getFieldPose().getRotation().getDegrees() * limelights.get(l).getTrust(); // Weighted rotation
+        tot += limelights.get(l).getTrust(); // Add the weights to divide later
       }
     }
 
